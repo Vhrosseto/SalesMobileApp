@@ -103,3 +103,21 @@ lib/
   <li>O aplicativo utiliza JSON para persistência de dados</li>
   <li>Interface adaptada para diferentes tamanhos de tela</li>
 </ul>
+
+<h2>👥 Desenvolvedores</h2>
+<table>
+  <tr>
+    <th>Nome</th>
+    <th>Matrícula</th>
+  </tr>
+  <tr>
+    <td>Victor Hugo Paulo Rosseto</td>
+    <td>123100013</td>
+  </tr>
+  <tr>
+    <td>Gabriel Dondoni Pecly</td>
+    <td>123100010</td>
+  </tr>
+</table>
+
+<h2>🤝 Contribuição</h2>
