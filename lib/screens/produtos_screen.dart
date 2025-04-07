@@ -428,25 +428,27 @@ class _ProdutosScreenState extends State<ProdutosScreen> {
                       ),
                     ),
                     if (_produtoEmEdicao != null)
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _produtoEmEdicao = null;
-                            _nomeController.clear();
-                            _unidadeSelecionada = null;
-                            _quantidadeEstoqueController.clear();
-                            _precoVendaController.clear();
-                            _statusSelecionado = null;
-                            _custoController.clear();
-                            _codigoBarraController.clear();
-                          });
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white70,
-                        ),
-                        child: Text(
-                          'Cancelar Edição',
-                          style: TextStyle(color: Colors.white70),
+                      Center(
+                        child: TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _produtoEmEdicao = null;
+                              _nomeController.clear();
+                              _unidadeSelecionada = null;
+                              _quantidadeEstoqueController.clear();
+                              _precoVendaController.clear();
+                              _statusSelecionado = null;
+                              _custoController.clear();
+                              _codigoBarraController.clear();
+                            });
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white70,
+                          ),
+                          child: Text(
+                            'Cancelar Edição',
+                            style: TextStyle(color: Colors.white70),
+                          ),
                         ),
                       ),
                     SizedBox(height: 20.0),

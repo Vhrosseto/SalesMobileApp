@@ -464,28 +464,30 @@ class _ClientesScreenState extends State<ClientesScreen> {
                       ),
                     ),
                     if (_clienteEmEdicao != null)
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _clienteEmEdicao = null;
-                            _nomeController.clear();
-                            _tipoSelecionado = null;
-                            _cpfCnpjController.clear();
-                            _emailController.clear();
-                            _telefoneController.clear();
-                            _cepController.clear();
-                            _enderecoController.clear();
-                            _bairroController.clear();
-                            _cidadeController.clear();
-                            _ufController.clear();
-                          });
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white70,
-                        ),
-                        child: Text(
-                          'Cancelar Edição',
-                          style: TextStyle(color: Colors.white70),
+                      Center(
+                        child: TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _clienteEmEdicao = null;
+                              _nomeController.clear();
+                              _tipoSelecionado = null;
+                              _cpfCnpjController.clear();
+                              _emailController.clear();
+                              _telefoneController.clear();
+                              _cepController.clear();
+                              _enderecoController.clear();
+                              _bairroController.clear();
+                              _cidadeController.clear();
+                              _ufController.clear();
+                            });
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white70,
+                          ),
+                          child: Text(
+                            'Cancelar Edição',
+                            style: TextStyle(color: Colors.white70),
+                          ),
                         ),
                       ),
                     SizedBox(height: 20.0),
