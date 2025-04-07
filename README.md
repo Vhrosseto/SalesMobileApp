@@ -103,9 +103,3 @@ lib/
   <li>O aplicativo utiliza JSON para persistência de dados</li>
   <li>Interface adaptada para diferentes tamanhos de tela</li>
 </ul>
-
-<h2>🤝 Contribuição</h2>
-<p>Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou enviar pull requests.</p>
-
-<h2>📄 Licença</h2>
-<p>Este projeto está sob a licença MIT. Veja o arquivo <a href="LICENSE">LICENSE</a> para mais detalhes.</p>
