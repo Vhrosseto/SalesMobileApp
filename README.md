@@ -119,5 +119,3 @@ lib/
     <td>123100010</td>
   </tr>
 </table>
-
-<h2>🤝 Contribuição</h2>
