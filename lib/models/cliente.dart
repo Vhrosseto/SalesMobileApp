@@ -1,5 +1,5 @@
 class Cliente {
-  int id; // Alterado para int
+  int id; 
   String nome;
   String tipo;
   String cpfCnpj;
@@ -25,10 +25,9 @@ class Cliente {
     this.uf,
   });
 
-  // Método para converter um objeto Cliente em um mapa JSON
   Map<String, dynamic> toJson() {
     return {
-      'id': id, // Mantém como está, o json.encode lidará com o tipo
+      'id': id, 
       'nome': nome,
       'tipo': tipo,
       'cpfCnpj': cpfCnpj,
@@ -42,10 +41,9 @@ class Cliente {
     };
   }
 
-  // Método para criar um objeto Cliente a partir de um mapa JSON
   factory Cliente.fromJson(Map<String, dynamic> json) {
     return Cliente(
-      id: json['id'] as int, // Faz o cast para int ao ler do JSON
+      id: json['id'] as int, 
       nome: json['nome'] as String,
       tipo: json['tipo'] as String,
       cpfCnpj: json['cpfCnpj'] as String,

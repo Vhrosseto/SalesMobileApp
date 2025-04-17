@@ -29,7 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final directory = await getApplicationDocumentsDirectory();
       final file = File('${directory.path}/usuarios.json');
       if (!await file.exists()) {
-        return []; // Retorna lista vazia se o arquivo não existe
+        return []; 
       }
       final contents = await file.readAsString();
       final List<dynamic> jsonList = json.decode(contents);
@@ -65,7 +65,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     if (usuarioAutenticado != null) {
-      // Navegar para a HomeScreen após o login
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomeScreen()),
@@ -98,20 +97,18 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[900], // Fundo escuro
+      backgroundColor: Colors.grey[900], 
       body: Center(
         child: SingleChildScrollView(
           padding: EdgeInsets.all(32.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              // Espaço para a Logo
               Container(
                 width: 150,
                 height: 150,
                 margin: EdgeInsets.only(bottom: 30.0),
                 decoration: BoxDecoration(
-                  // Você pode substituir isso por uma imagem da sua logo
                   color: Color(0xFF175B8C),
                   borderRadius: BorderRadius.circular(15.0),
                 ),
@@ -126,7 +123,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-              // Campo de Nome de Usuário
               TextField(
                 controller: _nomeController,
                 style: TextStyle(color: Colors.white),
@@ -145,7 +141,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               SizedBox(height: 20.0),
-              // Campo de Senha
               TextField(
                 controller: _senhaController,
                 obscureText: true,
@@ -165,7 +160,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               SizedBox(height: 30.0),
-              // Botão Entrar
               FutureBuilder<List<Usuario>>(
                 future: _usuariosFuture,
                 builder: (context, snapshot) {
@@ -191,7 +185,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
               ),
               SizedBox(height: 20.0),
-              // REMOVEMOS O BOTÃO "Criar nova conta"
             ],
           ),
         ),

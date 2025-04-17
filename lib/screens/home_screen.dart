@@ -67,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         },
       ),
-      backgroundColor: Colors.grey[900], // Garante o fundo cinza no Scaffold
+      backgroundColor: Colors.grey[900],
     );
   }
 }

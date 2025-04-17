@@ -9,7 +9,6 @@ class Usuario {
     required this.senha,
   });
 
-  // Método para criar um objeto Usuario a partir de um mapa (JSON)
   factory Usuario.fromJson(Map<String, dynamic> json) {
     return Usuario(
       id: json['id'],
@@ -18,7 +17,6 @@ class Usuario {
     );
   }
 
-  // Método para converter o objeto Usuario em um mapa (JSON)
   Map<String, dynamic> toJson() {
     return {
       'id': id,

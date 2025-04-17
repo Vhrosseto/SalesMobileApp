@@ -121,7 +121,7 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
                 style: TextStyle(color: Color(0xFF3BA9F8)),
               ),
               onPressed: () {
-                Navigator.of(context).pop(false); // Retorna false (não excluir)
+                Navigator.of(context).pop(false);  
               },
             ),
             TextButton(
@@ -130,7 +130,7 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
                 style: TextStyle(color: Color(0xFF3BA9F8)),
               ),
               onPressed: () {
-                Navigator.of(context).pop(true); // Retorna true (excluir)
+                Navigator.of(context).pop(true); 
               },
             ),
           ],
@@ -142,7 +142,7 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
           List<Usuario> usuariosExistentes = await _lerUsuarios();
           usuariosExistentes.removeWhere((u) => u.id == usuario.id);
           await _escreverUsuarios(usuariosExistentes);
-          _carregarListaUsuarios(); // Recarrega a lista após a exclusão
+          _carregarListaUsuarios(); 
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Usuário excluído com sucesso!')),

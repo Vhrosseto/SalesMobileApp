@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
-import '../models/cliente.dart'; // Importe o model Cliente
+import '../models/cliente.dart';  
 
 class ClientesScreen extends StatefulWidget {
   const ClientesScreen({super.key});
