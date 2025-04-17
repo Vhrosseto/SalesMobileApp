@@ -101,7 +101,6 @@ lib/
 <ul>
   <li>Os dados são armazenados localmente no dispositivo</li>
   <li>O aplicativo utiliza JSON para persistência de dados</li>
-  <li>Interface adaptada para diferentes tamanhos de tela</li>
 </ul>
 
 <h2>👥 Desenvolvedores</h2>
