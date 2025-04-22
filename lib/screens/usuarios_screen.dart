@@ -89,6 +89,12 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Usuário cadastrado com sucesso!')),
         );
+        
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
+        return;
       }
 
       await _carregarUsuarios();

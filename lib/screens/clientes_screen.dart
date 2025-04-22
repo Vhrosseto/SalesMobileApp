@@ -80,7 +80,6 @@ class _ClientesScreenState extends State<ClientesScreen> {
       });
 
       try {
-        int novoId = _clientes.isEmpty ? 1 : _clientes.last.id + 1;
         String nome = _nomeController.text;
         String? tipo = _tipoSelecionado;
         String cpfCnpj = _cpfCnpjController.text;
@@ -93,7 +92,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
         String? uf = _ufController.text.isNotEmpty ? _ufController.text : null;
 
         final novoCliente = Cliente(
-          id: novoId,
+          id: _clienteEmEdicao?.id ?? (_clientes.isEmpty ? 1 : _clientes.last.id + 1),
           nome: nome,
           tipo: tipo!,
           cpfCnpj: cpfCnpj,
