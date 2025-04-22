@@ -72,6 +72,10 @@
 
 <pre>
 lib/
+├── controllers/
+│   ├── cliente_controller.dart
+│   ├── produto_controller.dart
+│   └── usuario_controller.dart
 ├── models/
 │   ├── cliente.dart
 │   ├── produto.dart
