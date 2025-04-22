@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/usuario.dart';
 import '../controllers/usuario_controller.dart';
+import 'login_screen.dart';
 
 class UsuariosScreen extends StatefulWidget {
   const UsuariosScreen({super.key});
@@ -12,7 +13,8 @@ class UsuariosScreen extends StatefulWidget {
 class _UsuariosScreenState extends State<UsuariosScreen> {
   final TextEditingController _nomeController = TextEditingController();
   final TextEditingController _senhaController = TextEditingController();
-  final TextEditingController _confirmarSenhaController = TextEditingController();
+  final TextEditingController _confirmarSenhaController =
+      TextEditingController();
   final _usuarioController = UsuarioController();
   List<Usuario> _usuarios = [];
   Usuario? _usuarioEmEdicao;
@@ -89,7 +91,7 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Usuário cadastrado com sucesso!')),
         );
-        
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => LoginScreen()),
@@ -101,9 +103,9 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
       _limparFormulario();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro: ${e.toString()}')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro: ${e.toString()}')));
     } finally {
       setState(() {
         _isLoading = false;
@@ -190,227 +192,256 @@ class _UsuariosScreenState extends State<UsuariosScreen> {
         backgroundColor: Colors.grey[800],
       ),
       backgroundColor: Colors.grey[900],
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    TextFormField(
-                      controller: _nomeController,
-                      style: TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        labelText: 'Nome de Usuário *',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        border: OutlineInputBorder(),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF175B8C)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF3BA9F8)),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'O nome de usuário é obrigatório';
-                        }
-                        if (value.length < 3) {
-                          return 'O nome deve ter pelo menos 3 caracteres';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 20.0),
-                    TextFormField(
-                      controller: _senhaController,
-                      obscureText: true,
-                      style: TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        labelText: _usuarioEmEdicao == null ? 'Senha *' : 'Nova Senha',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        border: OutlineInputBorder(),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF175B8C)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF3BA9F8)),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (_usuarioEmEdicao == null && (value == null || value.isEmpty)) {
-                          return 'A senha é obrigatória';
-                        }
-                        if (value != null && value.isNotEmpty && value.length < 6) {
-                          return 'A senha deve ter pelo menos 6 caracteres';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 20.0),
-                    TextFormField(
-                      controller: _confirmarSenhaController,
-                      obscureText: true,
-                      style: TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        labelText: _usuarioEmEdicao == null ? 'Confirmar Senha *' : 'Confirmar Nova Senha',
-                        labelStyle: TextStyle(color: Colors.white70),
-                        border: OutlineInputBorder(),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF175B8C)),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF3BA9F8)),
-                        ),
-                        errorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red),
-                        ),
-                        focusedErrorBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (_usuarioEmEdicao == null && (value == null || value.isEmpty)) {
-                          return 'A confirmação de senha é obrigatória';
-                        }
-                        if (_senhaController.text.isNotEmpty && value != _senhaController.text) {
-                          return 'As senhas não coincidem';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 30.0),
-                    ElevatedButton(
-                      onPressed: _cadastrarUsuario,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF3BA9F8),
-                        padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                        textStyle: TextStyle(fontSize: 18),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                      ),
-                      child: Text(
-                        _usuarioEmEdicao == null ? 'Cadastrar' : 'Salvar',
-                        style: TextStyle(color: Colors.grey[900]),
-                      ),
-                    ),
-                    if (_usuarioEmEdicao != null)
-                      TextButton(
-                        onPressed: _limparFormulario,
-                        style: TextButton.styleFrom(foregroundColor: Colors.white70),
-                        child: Text(
-                          'Cancelar Edição',
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                      ),
-                    SizedBox(height: 20.0),
-                    Text(
-                      'Usuários Cadastrados',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(height: 10.0),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: DataTable(
-                          headingRowColor: WidgetStateProperty.all(Colors.grey[800]),
-                          dataRowColor: WidgetStateProperty.all(Colors.grey[850]),
-                          dividerThickness: 1,
-                          decoration: BoxDecoration(
-                            border: Border(
-                              bottom: BorderSide(color: Color(0xFF175B8C)),
-                            ),
+      body:
+          _isLoading
+              ? Center(child: CircularProgressIndicator())
+              : Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      TextFormField(
+                        controller: _nomeController,
+                        style: TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          labelText: 'Nome de Usuário *',
+                          labelStyle: TextStyle(color: Colors.white70),
+                          border: OutlineInputBorder(),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFF175B8C)),
                           ),
-                          columns: const <DataColumn>[
-                            DataColumn(
-                              label: Text(
-                                'ID',
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                            ),
-                            DataColumn(
-                              label: Text(
-                                'Nome',
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                            ),
-                            DataColumn(
-                              label: Text(
-                                'Editar',
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                            ),
-                            DataColumn(
-                              label: Text(
-                                'Excluir',
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                            ),
-                          ],
-                          rows: _usuarios
-                              .map(
-                                (usuario) => DataRow(
-                                  key: ValueKey(usuario.id),
-                                  cells: <DataCell>[
-                                    DataCell(
-                                      Text(
-                                        usuario.id.toString(),
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      Text(
-                                        usuario.nome,
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      IconButton(
-                                        icon: Icon(
-                                          Icons.edit,
-                                          color: Colors.white70,
-                                        ),
-                                        onPressed: () => _editarUsuario(usuario),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      IconButton(
-                                        icon: Icon(
-                                          Icons.delete,
-                                          color: Colors.white70,
-                                        ),
-                                        onPressed: () => _excluirUsuario(usuario),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                              .toList(),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFF3BA9F8)),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'O nome de usuário é obrigatório';
+                          }
+                          if (value.length < 3) {
+                            return 'O nome deve ter pelo menos 3 caracteres';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 20.0),
+                      TextFormField(
+                        controller: _senhaController,
+                        obscureText: true,
+                        style: TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          labelText:
+                              _usuarioEmEdicao == null
+                                  ? 'Senha *'
+                                  : 'Nova Senha',
+                          labelStyle: TextStyle(color: Colors.white70),
+                          border: OutlineInputBorder(),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFF175B8C)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFF3BA9F8)),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (_usuarioEmEdicao == null &&
+                              (value == null || value.isEmpty)) {
+                            return 'A senha é obrigatória';
+                          }
+                          if (value != null &&
+                              value.isNotEmpty &&
+                              value.length < 6) {
+                            return 'A senha deve ter pelo menos 6 caracteres';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 20.0),
+                      TextFormField(
+                        controller: _confirmarSenhaController,
+                        obscureText: true,
+                        style: TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          labelText:
+                              _usuarioEmEdicao == null
+                                  ? 'Confirmar Senha *'
+                                  : 'Confirmar Nova Senha',
+                          labelStyle: TextStyle(color: Colors.white70),
+                          border: OutlineInputBorder(),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFF175B8C)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFF3BA9F8)),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (_usuarioEmEdicao == null &&
+                              (value == null || value.isEmpty)) {
+                            return 'A confirmação de senha é obrigatória';
+                          }
+                          if (_senhaController.text.isNotEmpty &&
+                              value != _senhaController.text) {
+                            return 'As senhas não coincidem';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 30.0),
+                      ElevatedButton(
+                        onPressed: _cadastrarUsuario,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF3BA9F8),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 50,
+                            vertical: 15,
+                          ),
+                          textStyle: TextStyle(fontSize: 18),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        child: Text(
+                          _usuarioEmEdicao == null ? 'Cadastrar' : 'Salvar',
+                          style: TextStyle(color: Colors.grey[900]),
                         ),
                       ),
-                    ),
-                  ],
+                      if (_usuarioEmEdicao != null)
+                        TextButton(
+                          onPressed: _limparFormulario,
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white70,
+                          ),
+                          child: Text(
+                            'Cancelar Edição',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ),
+                      SizedBox(height: 20.0),
+                      Text(
+                        'Usuários Cadastrados',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 10.0),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: DataTable(
+                            headingRowColor: WidgetStateProperty.all(
+                              Colors.grey[800],
+                            ),
+                            dataRowColor: WidgetStateProperty.all(
+                              Colors.grey[850],
+                            ),
+                            dividerThickness: 1,
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(color: Color(0xFF175B8C)),
+                              ),
+                            ),
+                            columns: const <DataColumn>[
+                              DataColumn(
+                                label: Text(
+                                  'ID',
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Nome',
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Editar',
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                              ),
+                              DataColumn(
+                                label: Text(
+                                  'Excluir',
+                                  style: TextStyle(color: Colors.white70),
+                                ),
+                              ),
+                            ],
+                            rows:
+                                _usuarios
+                                    .map(
+                                      (usuario) => DataRow(
+                                        key: ValueKey(usuario.id),
+                                        cells: <DataCell>[
+                                          DataCell(
+                                            Text(
+                                              usuario.id.toString(),
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                          DataCell(
+                                            Text(
+                                              usuario.nome,
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                          DataCell(
+                                            IconButton(
+                                              icon: Icon(
+                                                Icons.edit,
+                                                color: Colors.white70,
+                                              ),
+                                              onPressed:
+                                                  () => _editarUsuario(usuario),
+                                            ),
+                                          ),
+                                          DataCell(
+                                            IconButton(
+                                              icon: Icon(
+                                                Icons.delete,
+                                                color: Colors.white70,
+                                              ),
+                                              onPressed:
+                                                  () =>
+                                                      _excluirUsuario(usuario),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                    .toList(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
     );
   }
 }
