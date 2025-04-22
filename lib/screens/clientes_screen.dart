@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
-import '../models/cliente.dart';  
+import '../models/cliente.dart';
+import '../controllers/cliente_controller.dart';
 
 class ClientesScreen extends StatefulWidget {
   const ClientesScreen({super.key});
@@ -24,17 +24,40 @@ class _ClientesScreenState extends State<ClientesScreen> {
   final _bairroController = TextEditingController();
   final _cidadeController = TextEditingController();
   final _ufController = TextEditingController();
-  List<Cliente> _listaClientes = [];
   Cliente? _clienteEmEdicao;
+  final _clienteController = ClienteController();
+  List<Cliente> _clientes = [];
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _carregarListaClientes();
+    _carregarClientes();
   }
 
-  Future<void> _carregarListaClientes() async {
-    _listaClientes = await _lerClientes();
+  Future<void> _carregarClientes() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final listaClientes = await _clienteController.listarClientes();
+      setState(() {
+        _clientes = listaClientes;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao carregar clientes: ${e.toString()}')),
+      );
+    }
+  }
+
+  void _limparFormulario() {
     setState(() {
       _clienteEmEdicao = null;
       _nomeController.clear();
@@ -52,65 +75,62 @@ class _ClientesScreenState extends State<ClientesScreen> {
 
   void _cadastrarCliente() async {
     if (_formKey.currentState!.validate()) {
-      int novoId = _listaClientes.isEmpty ? 1 : _listaClientes.last.id + 1;
-      String nome = _nomeController.text;
-      String? tipo = _tipoSelecionado;
-      String cpfCnpj = _cpfCnpjController.text;
-      String? email =
-          _emailController.text.isNotEmpty ? _emailController.text : null;
-      String? telefone =
-          _telefoneController.text.isNotEmpty ? _telefoneController.text : null;
-      String? cep = _cepController.text.isNotEmpty ? _cepController.text : null;
-      String? endereco =
-          _enderecoController.text.isNotEmpty ? _enderecoController.text : null;
-      String? bairro =
-          _bairroController.text.isNotEmpty ? _bairroController.text : null;
-      String? cidade =
-          _cidadeController.text.isNotEmpty ? _cidadeController.text : null;
-      String? uf = _ufController.text.isNotEmpty ? _ufController.text : null;
-
-      final novoCliente = Cliente(
-        id: novoId,
-        nome: nome,
-        tipo: tipo!,
-        cpfCnpj: cpfCnpj,
-        email: email,
-        telefone: telefone,
-        cep: cep,
-        endereco: endereco,
-        bairro: bairro,
-        cidade: cidade,
-        uf: uf,
-      );
+      setState(() {
+        _isLoading = true;
+      });
 
       try {
-        List<Cliente> clientesExistentes = await _lerClientes();
+        int novoId = _clientes.isEmpty ? 1 : _clientes.last.id + 1;
+        String nome = _nomeController.text;
+        String? tipo = _tipoSelecionado;
+        String cpfCnpj = _cpfCnpjController.text;
+        String? email = _emailController.text.isNotEmpty ? _emailController.text : null;
+        String? telefone = _telefoneController.text.isNotEmpty ? _telefoneController.text : null;
+        String? cep = _cepController.text.isNotEmpty ? _cepController.text : null;
+        String? endereco = _enderecoController.text.isNotEmpty ? _enderecoController.text : null;
+        String? bairro = _bairroController.text.isNotEmpty ? _bairroController.text : null;
+        String? cidade = _cidadeController.text.isNotEmpty ? _cidadeController.text : null;
+        String? uf = _ufController.text.isNotEmpty ? _ufController.text : null;
+
+        final novoCliente = Cliente(
+          id: novoId,
+          nome: nome,
+          tipo: tipo!,
+          cpfCnpj: cpfCnpj,
+          email: email,
+          telefone: telefone,
+          cep: cep,
+          endereco: endereco,
+          bairro: bairro,
+          cidade: cidade,
+          uf: uf,
+        );
+
         if (_clienteEmEdicao != null) {
-          final index = clientesExistentes.indexWhere(
-            (c) => c.id == _clienteEmEdicao!.id,
+          await _clienteController.atualizarCliente(novoCliente);
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Cliente atualizado com sucesso!')),
           );
-          if (index != -1) {
-            clientesExistentes[index] = novoCliente;
-            await _escreverClientes(clientesExistentes);
-            if (!mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Cliente atualizado com sucesso!')),
-            );
-          }
         } else {
-          clientesExistentes.add(novoCliente);
-          await _escreverClientes(clientesExistentes);
+          await _clienteController.adicionarCliente(novoCliente);
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Cliente cadastrado com sucesso!')),
           );
         }
-        _carregarListaClientes();
+        
+        await _carregarClientes();
+        _limparFormulario();
       } catch (e) {
         if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Erro ao salvar cliente.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro: ${e.toString()}')),
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -169,50 +189,29 @@ class _ClientesScreenState extends State<ClientesScreen> {
       },
     ).then((deveExcluir) async {
       if (deveExcluir == true) {
+        setState(() {
+          _isLoading = true;
+        });
+        
         try {
-          List<Cliente> clientesExistentes = await _lerClientes();
-          clientesExistentes.removeWhere((c) => c.id == cliente.id);
-          await _escreverClientes(clientesExistentes);
-          _carregarListaClientes();
+          await _clienteController.excluirCliente(cliente.id);
+          await _carregarClientes();
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Cliente excluído com sucesso!')),
           );
         } catch (e) {
           if (!mounted) return;
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Erro ao excluir cliente.')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Erro ao excluir cliente: ${e.toString()}')),
+          );
+        } finally {
+          setState(() {
+            _isLoading = false;
+          });
         }
       }
     });
-  }
-
-  Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
-  }
-
-  Future<File> get _localFile async {
-    final path = await _localPath;
-    return File('$path/clientes.json');
-  }
-
-  Future<List<Cliente>> _lerClientes() async {
-    try {
-      final file = await _localFile;
-      final contents = await file.readAsString();
-      final List<dynamic> jsonList = json.decode(contents);
-      return jsonList.map((json) => Cliente.fromJson(json)).toList();
-    } catch (e) {
-      return [];
-    }
-  }
-
-  Future<void> _escreverClientes(List<Cliente> clientes) async {
-    final file = await _localFile;
-    final jsonString = json.encode(clientes.map((c) => c.toJson()).toList());
-    await file.writeAsString(jsonString);
   }
 
   @override
@@ -500,199 +499,197 @@ class _ClientesScreenState extends State<ClientesScreen> {
                       ),
                     ),
                     SizedBox(height: 10.0),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: DataTable(
-                        headingRowColor: WidgetStateProperty.all(
-                          Colors.grey[800],
-                        ),
-                        dataRowColor: WidgetStateProperty.all(Colors.grey[850]),
-                        dividerThickness: 1,
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(color: Color(0xFF175B8C)),
+                    if (_isLoading)
+                      Center(child: CircularProgressIndicator())
+                    else
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: DataTable(
+                          headingRowColor: WidgetStateProperty.all(
+                            Colors.grey[800],
                           ),
-                        ),
-                        columns: const <DataColumn>[
-                          DataColumn(
-                            label: Text(
-                              'ID',
-                              style: TextStyle(color: Colors.white70),
+                          dataRowColor: WidgetStateProperty.all(Colors.grey[850]),
+                          dividerThickness: 1,
+                          decoration: BoxDecoration(
+                            border: Border(
+                              bottom: BorderSide(color: Color(0xFF175B8C)),
                             ),
                           ),
-                          DataColumn(
-                            label: Text(
-                              'Nome',
-                              style: TextStyle(color: Colors.white70),
+                          columns: const <DataColumn>[
+                            DataColumn(
+                              label: Text(
+                                'ID',
+                                style: TextStyle(color: Colors.white70),
+                              ),
                             ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Tipo',
-                              style: TextStyle(color: Colors.white70),
+                            DataColumn(
+                              label: Text(
+                                'Nome',
+                                style: TextStyle(color: Colors.white70),
+                              ),
                             ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'CPF/CNPJ',
-                              style: TextStyle(color: Colors.white70),
+                            DataColumn(
+                              label: Text(
+                                'Tipo',
+                                style: TextStyle(color: Colors.white70),
+                              ),
                             ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Email',
-                              style: TextStyle(color: Colors.white70),
+                            DataColumn(
+                              label: Text(
+                                'CPF/CNPJ',
+                                style: TextStyle(color: Colors.white70),
+                              ),
                             ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Telefone',
-                              style: TextStyle(color: Colors.white70),
+                            DataColumn(
+                              label: Text(
+                                'Email',
+                                style: TextStyle(color: Colors.white70),
+                              ),
                             ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'CEP',
-                              style: TextStyle(color: Colors.white70),
+                            DataColumn(
+                              label: Text(
+                                'Telefone',
+                                style: TextStyle(color: Colors.white70),
+                              ),
                             ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Endereço',
-                              style: TextStyle(color: Colors.white70),
+                            DataColumn(
+                              label: Text(
+                                'CEP',
+                                style: TextStyle(color: Colors.white70),
+                              ),
                             ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Bairro',
-                              style: TextStyle(color: Colors.white70),
+                            DataColumn(
+                              label: Text(
+                                'Endereço',
+                                style: TextStyle(color: Colors.white70),
+                              ),
                             ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Cidade',
-                              style: TextStyle(color: Colors.white70),
+                            DataColumn(
+                              label: Text(
+                                'Bairro',
+                                style: TextStyle(color: Colors.white70),
+                              ),
                             ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'UF',
-                              style: TextStyle(color: Colors.white70),
+                            DataColumn(
+                              label: Text(
+                                'Cidade',
+                                style: TextStyle(color: Colors.white70),
+                              ),
                             ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Editar',
-                              style: TextStyle(color: Colors.white70),
+                            DataColumn(
+                              label: Text(
+                                'UF',
+                                style: TextStyle(color: Colors.white70),
+                              ),
                             ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Excluir',
-                              style: TextStyle(color: Colors.white70),
+                            DataColumn(
+                              label: Text(
+                                'Editar',
+                                style: TextStyle(color: Colors.white70),
+                              ),
                             ),
-                          ),
-                        ],
-                        rows:
-                            _listaClientes
-                                .map(
-                                  (cliente) => DataRow(
-                                    key: ValueKey(cliente.id),
-                                    cells: <DataCell>[
-                                      DataCell(
-                                        Text(
-                                          cliente.id.toString(),
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                      DataCell(
-                                        Text(
-                                          cliente.nome,
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                      DataCell(
-                                        Text(
-                                          cliente.tipo == 'F'
-                                              ? 'Física'
-                                              : 'Jurídica',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                      DataCell(
-                                        Text(
-                                          cliente.cpfCnpj,
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                      DataCell(
-                                        Text(
-                                          cliente.email ?? '-',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                      DataCell(
-                                        Text(
-                                          cliente.telefone ?? '-',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                      DataCell(
-                                        Text(
-                                          cliente.cep ?? '-',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                      DataCell(
-                                        Text(
-                                          cliente.endereco ?? '-',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                      DataCell(
-                                        Text(
-                                          cliente.bairro ?? '-',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                      DataCell(
-                                        Text(
-                                          cliente.cidade ?? '-',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                      DataCell(
-                                        Text(
-                                          cliente.uf ?? '-',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                      DataCell(
-                                        IconButton(
-                                          icon: Icon(
-                                            Icons.edit,
-                                            color: Colors.white70,
-                                          ),
-                                          onPressed:
-                                              () => _editarCliente(cliente),
-                                        ),
-                                      ),
-                                      DataCell(
-                                        IconButton(
-                                          icon: Icon(
-                                            Icons.delete,
-                                            color: Colors.white70,
-                                          ),
-                                          onPressed:
-                                              () => _excluirCliente(cliente),
-                                        ),
-                                      ),
-                                    ],
+                            DataColumn(
+                              label: Text(
+                                'Excluir',
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                            ),
+                          ],
+                          rows: _clientes.map((cliente) => DataRow(
+                            key: ValueKey(cliente.id),
+                            cells: <DataCell>[
+                              DataCell(
+                                Text(
+                                  cliente.id.toString(),
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  cliente.nome,
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  cliente.tipo == 'F'
+                                      ? 'Física'
+                                      : 'Jurídica',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  cliente.cpfCnpj,
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  cliente.email ?? '-',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  cliente.telefone ?? '-',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  cliente.cep ?? '-',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  cliente.endereco ?? '-',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  cliente.bairro ?? '-',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  cliente.cidade ?? '-',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  cliente.uf ?? '-',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              DataCell(
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.edit,
+                                    color: Colors.white70,
                                   ),
-                                )
-                                .toList(),
+                                  onPressed:
+                                      () => _editarCliente(cliente),
+                                ),
+                              ),
+                              DataCell(
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.delete,
+                                    color: Colors.white70,
+                                  ),
+                                  onPressed:
+                                      () => _excluirCliente(cliente),
+                                ),
+                              ),
+                            ],
+                          )).toList(),
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
